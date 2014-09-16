@@ -5,9 +5,9 @@ import zulip
 import random
 from pymongo import MongoClient
 from collections import defaultdict
-from enum import Enum
 
 SENTIMENT_URL = 'http://text-processing.com/api/sentiment/'
+# TODO: change this
 MONGO_URI = 'localhost'
 MONGO_DB = 'test'
 
@@ -61,6 +61,7 @@ def process(msg):
 			reply = get_mood_msg(last_msg.mood)
 		elif content == 'no':
 			last_msg = msg_log.pop(sender)
+			# FIXME: change the logic here
 			reply = 'Okay I give up! Just tell me if you are `happy`, `okay` or `unhappy` by typing in `mood <your mood>`'
 		else:
 			reply = 'I\'m confused :confused:. Please say yes or no!'

@@ -1,6 +1,6 @@
 # Mood Bot
 
-A chatbot for Zulip that does sentiment analysis on user's input. 
+A chatbot for Zulip that does sentiment analysis on user's input and attempts to have a conversation with the user.
 
 [WORK IN PROGRESS]
 

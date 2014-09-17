@@ -9,11 +9,11 @@ from collections import defaultdict
 SENTIMENT_URL = 'http://text-processing.com/api/sentiment/'
 # TODO: change this
 MONGO_URI = 'localhost'
-MONGO_DB = 'test'
+DB_NAME = 'test'
 
 client = zulip.Client(email=os.environ['ZULIP_BOT_EMAIL'], api_key=os.environ['ZULIP_KEY'])
 mongo = MongoClient()
-db = mongo.test
+db = mongo[DB_NAME]
 #user = db.users.find_one(email=email)
 msg_log = {}
 mood_msg = defaultdict(list)
@@ -50,19 +50,21 @@ def sent_analysis(content):
 	return replies[json.loads(resp.text)['label']]
 
 def process(msg):
-	content = msg['content'].lower()
 	sender = msg['sender_email']
+	# prevent the bot from talking to itself
+	if sender == 'mood-bot@students.hackerschool.com': return
 
-	# TODO: calculate precision recall F1 score 
-	# TODO: find user by email and get mood history
+	# TODO: calculate precision recall F1 score?
+	# TODO: find user by email and get mood history?
+
+	# fetch the last message for the sender if exist
 	if sender in msg_log:
-		if content == 'yes':
+		if content.startswith('yes'):
 			last_msg = msg_log.pop(sender)
 			reply = get_mood_msg(last_msg.mood)
-		elif content == 'no':
+		elif content.startswith('no'):
 			last_msg = msg_log.pop(sender)
-			# FIXME: change the logic here
-			reply = 'Okay I give up! Just tell me if you are `happy`, `okay` or `unhappy` by typing in `mood <your mood>`'
+			reply = 'Give me another chance!'
 		else:
 			reply = 'I\'m confused :confused:. Please say yes or no!'
 	else:

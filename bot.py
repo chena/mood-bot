@@ -43,9 +43,9 @@ def sent_analysis(content):
 		return 'I don\'t understand you!'
 
 	replies = {
-		'neg': Message('I guess you are not happy? :cry:', 'unhappy'),
 		'pos': Message('I think you are happy!? :smiley:', 'happy'),
-		'neutral': Message('You sound neutral?', 'okay')
+		'neg': Message('I guess you are not happy? :cry:', 'unhappy'),
+		'neutral': Message('You sound neutral? :neutral_face:', 'okay')
 	}
 	return replies[json.loads(resp.text)['label']]
 
@@ -56,9 +56,16 @@ def process(msg):
 
 	# TODO: calculate precision recall F1 score?
 	# TODO: find user by email and get mood history?
+	content = msg['content'].lower()
 
+	if content.startswith(('hi', 'hello', 'hey', 'mood-log')):
+		user = db.users.find_one({'email': sender})
+		if not user:
+			reply = 'I don\'t know you. Please introduce yourself on [Mood Tracker](http://hs-mood.herokuapp.com).'
+		else:
+			reply = make_emoji_log(user['moods'])
 	# fetch the last message for the sender if exist
-	if sender in msg_log:
+	elif sender in msg_log:
 		if content.startswith('yes'):
 			last_msg = msg_log.pop(sender)
 			reply = get_mood_msg(last_msg.mood)
@@ -77,6 +84,20 @@ def process(msg):
 			'to': sender,
 			'content': reply
 		})
+
+def make_emoji_log(moods):
+	reply = ''
+	emoji = {
+		'happy': ':smiley:',
+		'unhappy': ':cry:',
+		'okay': ':neutral_face:'
+	}
+
+	for date in sorted(moods.keys()):
+		#reply += "%s: %s\t" % (date, emoji[moods[date]])
+		reply += emoji[moods[date]]
+	return reply
+
 
 if __name__ == '__main__':
 	set_mood_messages()

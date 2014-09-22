@@ -5,6 +5,7 @@ import zulip
 import random
 from pymongo import MongoClient
 from collections import defaultdict
+from collections import namedtuple
 
 SENTIMENT_URL = 'http://text-processing.com/api/sentiment/'
 # TODO: change this
@@ -17,6 +18,10 @@ db = mongo[DB_NAME]
 #user = db.users.find_one(email=email)
 msg_log = {}
 mood_msg = defaultdict(list)
+
+# TODO: refactoring
+class MoodBot(object):
+	pass
 
 class Message(object):
 	def __init__(self, msg, mood=None):
@@ -32,7 +37,7 @@ def get_mood_msg(mood):
 	# this will raises IndexError if mood_msg[mood] is empty
 	return random.choice(mood_msg[mood])
 
-def sent_analysis(content):
+def sentiment_analysis(content):
 	resp = requests.post(SENTIMENT_URL, data=dict(text=content))
 	status = resp.status_code
 	
@@ -75,7 +80,7 @@ def process(msg):
 		else:
 			reply = 'I\'m confused :confused:. Please say yes or no!'
 	else:
-		result = sent_analysis(content)
+		result = sentiment_analysis(content)
 		reply = result.msg
 		msg_log[sender] = Message(reply, result.mood)
 	
@@ -84,6 +89,7 @@ def process(msg):
 			'to': sender,
 			'content': reply
 		})
+
 
 def make_emoji_log(moods):
 	reply = ''
